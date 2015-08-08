@@ -182,10 +182,10 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
  *****************/
 
 Warfarin.UI.id = {
-    dosing5mg: 'N_AFControl_4',
-    currentWeeklyDose5mg: 'N_AFControl_5',
+    dosing5mg: 'dosing-5mg',
+    currentWeeklyDose5mg: 'weekly-dose',
     currentWeeklyDoseText: 'N_AFControl_6',
-    inrResult: 'N_AFControl_7',
+    inrResult: 'inr-result-range',
     inrDate: 'N_AFControl_8_Date_dateInput',
     inrTime: 'N_AFControl_8_Time_dateInput',
     doseAdjustment: 'N_AFControl_9',
@@ -220,13 +220,15 @@ Warfarin.UI.isDosing5mg = function() {
  */
 Warfarin.UI.setDosing5mg = function(status) {
     var yes = $('#'+Warfarin.UI.id.dosing5mg+' option:eq(1)').val();
-    var no = $('#'+Warfarin.UI.id.dosing5mg+' option:eq(2)').val();
+    var no = $('#'+Warfarin.UI.id.dosing5mg+' option:eq(0)').val();
     
     if (status) {
         $('#'+Warfarin.UI.id.dosing5mg).val(yes);
     } else {
         $('#'+Warfarin.UI.id.dosing5mg).val(no);
     }
+    
+    $('#'+Warfarin.UI.id.dosing5mg).flipswitch('refresh');
 };
 
 /*
@@ -255,6 +257,8 @@ Warfarin.UI.setCurrentWeeklyDose5mg = function(dose) {
             break;
         }
     } 
+    
+    $('#'+Warfarin.UI.id.currentWeeklyDose5mg).selectmenu('refresh', true);
 };
 
 
@@ -326,6 +330,8 @@ Warfarin.UI.setINRResult = function(index) {
     var tmp = $('#'+Warfarin.UI.id.inrResult+' option:eq('+index+')').val();
     
     $('#'+Warfarin.UI.id.inrResult).val(tmp);
+    
+    $('#'+Warfarin.UI.id.inrResult).selectmenu('refresh', true);
 };
 
 Warfarin.UI.getINRDate = function() {

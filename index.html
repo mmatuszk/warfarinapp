@@ -42,10 +42,13 @@
     </div>    
   </div>
   
+  <script src="warfarin.js"></script>
   <script>
     for (var i = 10; i < 110; i+= 2.5) {
       $('<option value="'+i.toFixed(1)+'">'+i.toFixed(1)+'</option>').appendTo('#weekly-dose');
     }
+    $('#weekly-dose').val('30.0');
+    //$('#weekly-dose').selectmenu('refresh', true);
   </script>
 </body>
 </html>
