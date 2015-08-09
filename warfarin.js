@@ -63,6 +63,21 @@ Warfarin.dosingSchedule = {
     "80.0": ["2","2.5","2","2.5","2","2.5","2.5"]
 };
 
+Warfarin.dosingChange1 = {
+  // less than 1.5
+  0: {change: "increase", min: 0.1, max: 0.2, nextDateMin: 4, nextDateMax: 8},
+  // 1.5 - 2.9
+  1: {change: "increase", min: 0.05, max: 0.1, nextDateMin: 7, nextDateMax: 14},
+  // 2.0 - 3.0
+  2: {change: "no", min: 0, max: 0, nextDateMin: 28, nextDateMax: 28},
+  // 3.1 - 3.9
+  3: {change: "decrease", min: 0.05, max: 0.1, nextDateMin: 7, nextDateMax: 14},
+  // 4.0 - 4.9
+  4: {change: "decrease", min: 0.1, max: 0.1, nextDateMin: 4, nextDateMax: 8, holdMin: 0, holdMax: 1},
+  // greater or equal 5.0
+  5: {chnage: "special", special: "Manage per per your institutions protocol"}
+};
+
 /*
  * getDoseString
  * 
@@ -186,15 +201,15 @@ Warfarin.UI.id = {
     currentWeeklyDose5mg: 'weekly-dose',
     currentWeeklyDoseText: 'N_AFControl_6',
     inrResult: 'inr-result-range',
-    inrDate: 'N_AFControl_8_Date_dateInput',
+    inrDate: 'inr-date',
     inrTime: 'N_AFControl_8_Time_dateInput',
     doseAdjustment: 'N_AFControl_9',
-    newWeeklyDose5mg: 'N_AFControl_10',
+    newWeeklyDose5mg: 'new-weekly-dose',
     newWeeklyDoseText: 'N_AFControl_11',
-    nextINRDate: 'N_AFControl_12_Date_dateInput',
+    nextINRDate: 'next-inr-date',
     nextINRTime: 'N_AFControl_12_Time_dateInput',
     nextINRComment: 'N_AFControl_13',
-    calcScore: 'calcScore',
+    calcScore: 'calc',
     ref: 'ref',
     today: 'today',
     inrMsg: 'inrMsg'
@@ -203,7 +218,7 @@ Warfarin.UI.id = {
 Warfarin.UI.refURI = 'http://www.aafp.org/fpm/2005/0500/p77.html';
 
 // Use with Healthand centriq and Use Telerik for time and date controls
-Warfarin.UI.hl = true;
+Warfarin.UI.hl = false;
 
 
 Warfarin.UI.isDosing5mg = function() {
@@ -261,6 +276,11 @@ Warfarin.UI.setCurrentWeeklyDose5mg = function(dose) {
     $('#'+Warfarin.UI.id.currentWeeklyDose5mg).selectmenu('refresh', true);
 };
 
+Warfarin.UI.initCurrentWeeklyDose5mg = function() {
+  for (var i = 10; i < 110; i+= 2.5) {
+    $('<option value="'+i.toFixed(1)+'">'+i.toFixed(1)+'</option>').appendTo('#'+Warfarin.UI.id.currentWeeklyDose5mg);
+  }  
+};
 
 Warfarin.UI.setCurrentWeeklyDose = function(dose) {
     $('#'+Warfarin.UI.id.currentWeeklyDoseText).val(dose);
@@ -303,7 +323,15 @@ Warfarin.UI.setNewWeeklyDose5mg = function(dose) {
             $('#'+Warfarin.UI.id.newWeeklyDose5mg).val(val);
             break;
         }
-    } 
+    }
+    
+    $('#'+Warfarin.UI.id.newWeeklyDose5mg).selectmenu('refresh', true); 
+};
+
+Warfarin.UI.initNewWeeklyDose5mg = function() {
+  for (var i = 10; i < 110; i+= 2.5) {
+    $('<option value="'+i.toFixed(1)+'">'+i.toFixed(1)+'</option>').appendTo('#'+Warfarin.UI.id.newWeeklyDose5mg);
+  }  
 };
 
 Warfarin.UI.onNewWeeklyDose5mgChange = function () {
@@ -344,20 +372,12 @@ Warfarin.UI.getINRDate = function() {
 
 Warfarin.UI.setINRDate = function(date) {
     console.log(date);
-    if (Warfarin.UI.hl) {
-        if (!(date instanceof Date)) {
-            date = new Date(date);
-        }
-        var dCtl = $find(Warfarin.UI.id.inrDate);
-        var tCtl = $find(Warfarin.UI.id.inrTime);
-        dCtl.set_selectedDate(date);
-        tCtl.set_selectedDate(date);
+
+    if (date instanceof Date) {
+        // $('#'+Warfarin.UI.id.inrDate).val(date.toLocaleDateString()).change();
+        $('#'+Warfarin.UI.id.inrDate)[0].valueAsDate = date;
     } else {
-        if (date instanceof Date) {
-            $('#'+Warfarin.UI.id.inrDate).val(date.toLocaleDateString()).change();
-        } else {
-            $('#'+Warfarin.UI.id.inrDate).val(date).change();
-    }
+        $('#'+Warfarin.UI.id.inrDate).val(date).change();
     }
 };
 
@@ -384,7 +404,7 @@ Warfarin.UI.getNextINRDate = function() {
 
 Warfarin.UI.setNextINRDate = function(date) {
     if (date instanceof Date) {
-        $('#'+Warfarin.UI.id.nextINRDate).val(date.toLocaleDateString()).change();
+        $('#'+Warfarin.UI.id.nextINRDate)[0].valueAsDate = date;
     } else {
         $('#'+Warfarin.UI.id.nextINRDate).val(date).change();
     }
