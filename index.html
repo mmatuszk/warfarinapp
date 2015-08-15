@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>find demo</title>
-  <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.css" />
-  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-  <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.js"></script>
+  <link rel="stylesheet" href="jquery.mobile-1.4.5.css" />
+  <script src="jquery-1.11.1.js"></script>
+  <script src="jquery.mobile-1.4.5.js"></script>
   <!-- <script src="http://code.jquery.com/jquery-1.11.1.js"></script> -->
   </head>
 <body>
@@ -22,15 +22,19 @@
       <select id="weekly-dose">
         <option value="0">-Select-</option>
       </select>
+      <div data-role="collapsible">
+        <h1>Schedule</h1>
+        <div id="weekly-dose-text">Select weekly dose</div>
+      </div>
       <label for="inr-result-range">INR Result Range</label>
       <select id="inr-result-range">
-        <option value="0">-select-</option>
-        <option value="1">&lt; 1.5</option>
-        <option value="2">1.5 - 1.9</option>
-        <option value="3">2.0 - 3.0</option>
-        <option value="4">3.1 - 3.9</option>
-        <option value="5">4.0 - 4.9</option>
-        <option value="6">&ge; 5.0</optgroup>
+        <option value="-1">-select-</option>
+        <option value="0">&lt; 1.5</option>
+        <option value="1">1.5 - 1.9</option>
+        <option value="2">2.0 - 3.0</option>
+        <option value="3">3.1 - 3.9</option>
+        <option value="4">4.0 - 4.9</option>
+        <option value="5">&ge; 5.0</optgroup>
       </select>
       <label for="inr-date">INR Date</label>
       <input type="date" id="inr-date">
@@ -39,8 +43,14 @@
       <select id="new-weekly-dose">
         <option value+"0">-Select-</option>
       </select>
+      <div data-role="collapsible">
+        <h1>Schedule</h1>
+        <div id="new-weekly-dose-text">Select new weekly dose</div>
+      </div>
+      <div id="new-weekly-dose-comment"></div>
       <label for="next-inr-date">Next INR Date</label>
       <input type="date" id="next-inr-date" />
+      <div id="next-inr-date-comment"></div>
     </div>    
   </div>
   
@@ -51,6 +61,8 @@
       // Warfarin.UI.setCurrentWeeklyDose5mg(35);
       Warfarin.UI.initNewWeeklyDose5mg();
       // Warfarin.UI.setNewWeeklyDose5mg(30);
+      $('#weekly-dose').change(Warfarin.UI.onCurrentWeeklyDose5mgChange);
+      $('#new-weekly-dose').change(Warfarin.UI.onNewWeeklyDose5mgChange);
       $('#calc').click(Warfarin.UI.calcINR1);
     });
   </script>

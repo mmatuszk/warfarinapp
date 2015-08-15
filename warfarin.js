@@ -96,13 +96,13 @@ Warfarin.getDoseString = function(dose) {
     
     weeklySchedule = Warfarin.dosingSchedule[dose];
     
-    str = 'Mon: '+weeklySchedule[0]+', ';
-    str += 'Tue: '+weeklySchedule[1]+', ';
-    str += 'Wed: '+weeklySchedule[2]+', ';
-    str += 'Thr: '+weeklySchedule[3]+', ';
-    str += 'Fri: '+weeklySchedule[4]+', ';
-    str += 'Sat: '+weeklySchedule[5]+', ';
-    str += 'Sun: '+weeklySchedule[6];
+    str = 'Monday: '+weeklySchedule[0]+'<br> ';
+    str += 'Tuesday: '+weeklySchedule[1]+'<br> ';
+    str += 'Wednesday: '+weeklySchedule[2]+'<br> ';
+    str += 'Thursday: '+weeklySchedule[3]+'<br> ';
+    str += 'Friday: '+weeklySchedule[4]+'<br> ';
+    str += 'Saturday: '+weeklySchedule[5]+'<br> ';
+    str += 'Sunday: '+weeklySchedule[6];
     
     return str;
 };
@@ -134,7 +134,7 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
         throw "getDoseString: Invalid dose: "+dose;
     }
     
-    if (inrRange == '< 1.5') {
+    if (inrRange == 0) {
         // Increase dose by 10-20%;
         min = dose*1.10;
         max = dose*1.20;
@@ -148,7 +148,7 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
             newDose.dose = b;
         }
         newDose.nextInr = 7;
-    } else if (inrRange == '1.5 - 1.9') {
+    } else if (inrRange == 1) {
         // Increase dose by 5-10%;
         min = dose*1.05;
         max = dose*1.10;
@@ -162,10 +162,10 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
             newDose.dose = b;
         }
         newDose.nextInr = 14;        
-    } else if (inrRange == '2.0 - 3.0') {
+    } else if (inrRange == 2) {
         newDose.dose = dose;
         newDose.nextInr = 28;
-    } else if (inrRange == '3.1 - 3.9') {
+    } else if (inrRange == 3) {
         // Decrease dose by 5-10%;
         min = dose*0.9;
         max = dose*0.95;
@@ -179,13 +179,13 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
             newDose.dose = a;
         }
         newDose.nextInr = 14;        
-    } else if (inrRange == '4.0 - 4.9') {
+    } else if (inrRange == 4) {
         // Decrease dose by 10%;
         min = dose*0.9;
         newDose.dose = Math.round(min/2.5)*2.5;
         newDose.instructions = "Hold 1 dose";
         newDose.nextInr = 7;
-    } else if (inrRange == '>= 5.0') {
+    } else if (inrRange == 5) {
         newDose.instructions = "Please check the protocol. Patient may need Vitamin K and/or ER evaluation";
     }
     
@@ -199,16 +199,17 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
 Warfarin.UI.id = {
     dosing5mg: 'dosing-5mg',
     currentWeeklyDose5mg: 'weekly-dose',
-    currentWeeklyDoseText: 'N_AFControl_6',
+    currentWeeklyDoseText: 'weekly-dose-text',
     inrResult: 'inr-result-range',
     inrDate: 'inr-date',
     inrTime: 'N_AFControl_8_Time_dateInput',
     doseAdjustment: 'N_AFControl_9',
     newWeeklyDose5mg: 'new-weekly-dose',
-    newWeeklyDoseText: 'N_AFControl_11',
+    newWeeklyDoseText: 'new-weekly-dose-text',
+    newWeeklyDoseComment: 'new-weekly-dose-comment',
     nextINRDate: 'next-inr-date',
     nextINRTime: 'N_AFControl_12_Time_dateInput',
-    nextINRComment: 'N_AFControl_13',
+    nextINRComment: 'next-inr-date-comment',
     calcScore: 'calc',
     ref: 'ref',
     today: 'today',
@@ -283,7 +284,8 @@ Warfarin.UI.initCurrentWeeklyDose5mg = function() {
 };
 
 Warfarin.UI.setCurrentWeeklyDose = function(dose) {
-    $('#'+Warfarin.UI.id.currentWeeklyDoseText).val(dose);
+    // $('#'+Warfarin.UI.id.currentWeeklyDoseText).val(dose);
+    $('#'+Warfarin.UI.id.currentWeeklyDoseText).html(dose);
 };
 
 Warfarin.UI.onCurrentWeeklyDose5mgChange = function() {
@@ -347,11 +349,11 @@ Warfarin.UI.onNewWeeklyDose5mgChange = function () {
 };
 
 Warfarin.UI.setNewWeeklyDose = function(dose) {
-    $('#'+Warfarin.UI.id.newWeeklyDoseText).val(dose);
+    $('#'+Warfarin.UI.id.newWeeklyDoseText).html(dose);
 };
 
 Warfarin.UI.getINRResult = function() {
-    return $('#'+Warfarin.UI.id.inrResult+' option:selected').text();
+    return $('#'+Warfarin.UI.id.inrResult+' option:selected').val();
 };
 
 Warfarin.UI.setINRResult = function(index) {
