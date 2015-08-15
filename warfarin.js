@@ -65,17 +65,42 @@ Warfarin.dosingSchedule = {
 
 Warfarin.dosingChange1 = {
   // less than 1.5
-  0: {change: "increase", min: 0.1, max: 0.2, nextDateMin: 4, nextDateMax: 8},
+  0: {change: "increase", min: 0.1, max: 0.2, nextDate: 7, nextDateMin: 4, nextDateMax: 8},
   // 1.5 - 2.9
-  1: {change: "increase", min: 0.05, max: 0.1, nextDateMin: 7, nextDateMax: 14},
+  1: {change: "increase", min: 0.05, max: 0.1, nextDate: 14, nextDateMin: 7, nextDateMax: 14},
   // 2.0 - 3.0
-  2: {change: "no", min: 0, max: 0, nextDateMin: 28, nextDateMax: 28},
+  2: {change: "no", min: 0, max: 0, nextDate: 28, nextDateMin: 28, nextDateMax: 28},
   // 3.1 - 3.9
-  3: {change: "decrease", min: 0.05, max: 0.1, nextDateMin: 7, nextDateMax: 14},
+  3: {change: "decrease", min: 0.05, max: 0.1, nextDate: 14, nextDateMin: 7, nextDateMax: 14},
   // 4.0 - 4.9
-  4: {change: "decrease", min: 0.1, max: 0.1, nextDateMin: 4, nextDateMax: 8, holdMin: 0, holdMax: 1},
+  4: {change: "decrease", min: 0.1, max: 0.1, nextDate: 7, nextDateMin: 4, nextDateMax: 8, holdMin: 0, holdMax: 1},
   // greater or equal 5.0
-  5: {chnage: "special", special: "Manage per per your institutions protocol"}
+  5: {change: "special", special: "Manage per per your institutions protocol"}
+};
+
+Warfarin.dosingChange1.getDoseChangeString = function(index) {
+  var str = '';
+  if (this[index].change == 'increase') {
+    str += 'Increase dose by ';
+    if (this[index].min == this[index].max) {
+      str += this[index].min*100 + '%';
+    } else {
+      str += this[index].min*100 + '% to ' + this[index].max*100 + '%';
+    }
+  } else if (this[index].change == 'no') {
+    str = 'No change';
+  }  else if (this[index].change == 'decrease') {
+    str += 'Decrease dose by ';
+    if (this[index].min == this[index].max) {
+      str += this[index].min*100 + '%';
+    } else {
+      str += this[index].min*100 + '% to ' + this[index].max*100 + '%';
+    }
+  } else if (this[index].change == 'special') {
+    str = this[index].special;
+  }
+  
+  return str;
 };
 
 /*
@@ -123,8 +148,9 @@ Warfarin.getDoseString = function(dose) {
  * 
  */
 Warfarin.calcNewDose1 = function(inrRange, dose) {
-    var newDose = {dose: null, instructions: null, nextInr: null};
-    var min, max;
+    var newDose = null;
+    var min, max, a, b;
+    var dosingChange;
 
     if (typeof dose == 'number') {
         dose = dose.toFixed(1);
@@ -134,59 +160,39 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
         throw "getDoseString: Invalid dose: "+dose;
     }
     
-    if (inrRange == 0) {
-        // Increase dose by 10-20%;
-        min = dose*1.10;
-        max = dose*1.20;
-        var a = Math.round(min/2.5)*2.5;
-        var b = Math.round(max/2.5)*2.5;
-        console.log(min+' '+max);
-        console.log(a+' '+b);
-        if (a > min) {
-            newDose.dose = a;
-        } else {
-            newDose.dose = b;
-        }
-        newDose.nextInr = 7;
-    } else if (inrRange == 1) {
-        // Increase dose by 5-10%;
-        min = dose*1.05;
-        max = dose*1.10;
-        var a = Math.round(min/2.5)*2.5;
-        var b = Math.round(max/2.5)*2.5;
-        console.log(min+' '+max);
-        console.log(a+' '+b);
-        if (a > min) {
-            newDose.dose = a;
-        } else {
-            newDose.dose = b;
-        }
-        newDose.nextInr = 14;        
-    } else if (inrRange == 2) {
-        newDose.dose = dose;
-        newDose.nextInr = 28;
-    } else if (inrRange == 3) {
-        // Decrease dose by 5-10%;
-        min = dose*0.9;
-        max = dose*0.95;
-        var a = Math.round(min/2.5)*2.5;
-        var b = Math.round(max/2.5)*2.5;
-        console.log(min+' '+max);
-        console.log(a+' '+b);
-        if (b < max) {
-            newDose.dose = b;
-        } else {
-            newDose.dose = a;
-        }
-        newDose.nextInr = 14;        
-    } else if (inrRange == 4) {
-        // Decrease dose by 10%;
-        min = dose*0.9;
-        newDose.dose = Math.round(min/2.5)*2.5;
-        newDose.instructions = "Hold 1 dose";
-        newDose.nextInr = 7;
-    } else if (inrRange == 5) {
-        newDose.instructions = "Please check the protocol. Patient may need Vitamin K and/or ER evaluation";
+    if (typeof inrRange != 'number') {
+      throw 'Warfarin.calcNewDose1: inrRage must be a number';
+    }
+    
+    dosingChange = Warfarin.dosingChange1[inrRange];
+    if (dosingChange.change == 'increase') {
+      min = dose * (1+dosingChange.min);
+      max = dose * (1+dosingChange.max);
+      a = Math.round(min/2.5)*2.5;
+      b = Math.round(max/2.5)*2.5;      
+      console.log(min+' '+max);
+      console.log(a+' '+b);
+      if (a > min) {
+          newDose = a;
+      } else {
+          newDose = b;
+      }
+    } else if (dosingChange.change == 'decrease') {
+      min = dose * (1 - dosingChange.max);
+      max = dose * (1 - dosingChange.min);
+      var a = Math.round(min/2.5)*2.5;
+      var b = Math.round(max/2.5)*2.5;
+      console.log(min+' '+max);
+      console.log(a+' '+b);
+      if (b < max) {
+          newDose = b;
+      } else {
+          newDose = a;
+      }
+    } else if (dosingChange.change == 'no') {
+      newDose.dose = dose;
+    } else if (dosingChange.change = 'special') {
+      newDose = null;    
     }
     
     return newDose;
