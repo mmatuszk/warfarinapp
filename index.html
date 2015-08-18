@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>find demo</title>
+  <title>Warfarin Dosing Calculator</title>
   <link rel="stylesheet" href="jquery.mobile-1.4.5.css" />
   <script src="jquery-1.11.1.js"></script>
   <script src="jquery.mobile-1.4.5.js"></script>
@@ -12,7 +12,7 @@
 <body>
   <div data-role="page">
     <div role="main" class="ui-content">
-      <h1>Warfarin Dosing</h1>
+      <h2>INR Goal 2.0 - 3.0</h2>
       <label for="dosing-5mg">5mg Dosing</label>
       <select id="dosing-5mg" name="dosing-5mg" data-role="flipswitch">
         <option>No</option>
@@ -45,8 +45,9 @@
       </select>
       <div data-role="collapsible">
         <h1>Schedule</h1>
-        <div id="new-weekly-dose-text">Select new weekly dose</div>
+        <div id="new-weekly-dose-schedule">Select new weekly dose</div>
       </div>
+      <div id="new-weekly-dose-percent"></div>
       <div id="new-weekly-dose-comment"></div>
       <label for="next-inr-date">Next INR Date</label>
       <input type="date" id="next-inr-date" />
@@ -57,13 +58,14 @@
   <script src="warfarin.js"></script>
   <script>
     $(document).ready(function() {
-      Warfarin.UI.initCurrentWeeklyDose5mg();
+      Warfarin.UI.initINRCalc1();
+      // Warfarin.UI.initCurrentWeeklyDose5mg();
       // Warfarin.UI.setCurrentWeeklyDose5mg(35);
-      Warfarin.UI.initNewWeeklyDose5mg();
+      // Warfarin.UI.initNewWeeklyDose5mg();
       // Warfarin.UI.setNewWeeklyDose5mg(30);
-      $('#weekly-dose').change(Warfarin.UI.onCurrentWeeklyDose5mgChange);
-      $('#new-weekly-dose').change(Warfarin.UI.onNewWeeklyDose5mgChange);
-      $('#calc').click(Warfarin.UI.calcINR1);
+      // $('#weekly-dose').change(Warfarin.UI.onCurrentWeeklyDose5mgChange);
+      // $('#new-weekly-dose').change(Warfarin.UI.onNewWeeklyDose5mgChange);
+      // $('#calc').click(Warfarin.UI.calcINR1);
     });
   </script>
 </body>

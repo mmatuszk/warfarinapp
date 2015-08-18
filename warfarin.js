@@ -78,29 +78,49 @@ Warfarin.dosingChange1 = {
   5: {change: "special", special: "Manage per per your institutions protocol"}
 };
 
-Warfarin.dosingChange1.getDoseChangeString = function(index) {
+Warfarin.getDoseChangeString1 = function(index) {
+  var dosingChange = Warfarin.dosingChange1[index];
+  
   var str = '';
-  if (this[index].change == 'increase') {
+  if (dosingChange.change == 'increase') {
     str += 'Increase dose by ';
-    if (this[index].min == this[index].max) {
-      str += this[index].min*100 + '%';
+    if (dosingChange.min == dosingChange.max) {
+      str += dosingChange.min*100 + '%';
     } else {
-      str += this[index].min*100 + '% to ' + this[index].max*100 + '%';
+      str += dosingChange.min*100 + '% to ' + dosingChange.max*100 + '%';
     }
-  } else if (this[index].change == 'no') {
+  } else if (dosingChange.change == 'no') {
     str = 'No change';
-  }  else if (this[index].change == 'decrease') {
+  }  else if (dosingChange.change == 'decrease') {
     str += 'Decrease dose by ';
-    if (this[index].min == this[index].max) {
-      str += this[index].min*100 + '%';
+    if (dosingChange.min == dosingChange.max) {
+      str += dosingChange.min*100 + '%';
     } else {
-      str += this[index].min*100 + '% to ' + this[index].max*100 + '%';
+      str += dosingChange.min*100 + '% to ' + dosingChange.max*100 + '%';
     }
-  } else if (this[index].change == 'special') {
-    str = this[index].special;
+  } else if (dosingChange.change == 'special') {
+    str = dosingChange.special;
   }
   
   return str;
+};
+
+Warfarin.getNextDateString1 = function (index) {
+  var dosingChange = Warfarin.dosingChange1[index];
+
+  var str = '';
+ if (dosingChange.change == 'special') {
+    str = dosingChange.special;
+  } else {
+    str += 'Next INR in ';
+    if (dosingChange.nextDateMin == dosingChange.nextDateMax) {
+      str += dosingChange.nextDateMin + ' days';
+    } else {
+      str += dosingChange.nextDateMin+ ' to ' + dosingChange.nextDateMax + ' days';
+    }
+  }
+  
+  return str;  
 };
 
 /*
@@ -116,7 +136,8 @@ Warfarin.getDoseString = function(dose) {
     }
     
     if (!(dose in Warfarin.dosingSchedule)) {
-        throw "getDoseString: Invalid dose: "+dose;
+        // throw "getDoseString: Invalid dose: "+dose;
+        return "Select a valid dose";
     }
     
     weeklySchedule = Warfarin.dosingSchedule[dose];
@@ -140,11 +161,7 @@ Warfarin.getDoseString = function(dose) {
  * Reference: http://www.aafp.org/fpm/2005/0500/p77.html
  * 
  * Reteruns
- * { 
- *      dose: - new weekly warfarin dose
- *      nextInr - num of days in which next INR should be drawn
- *      instructions - special instructiosn
- * }
+ *    newDose
  * 
  */
 Warfarin.calcNewDose1 = function(inrRange, dose) {
@@ -158,10 +175,6 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
     
     if (!(dose in Warfarin.dosingSchedule)) {
         throw "getDoseString: Invalid dose: "+dose;
-    }
-    
-    if (typeof inrRange != 'number') {
-      throw 'Warfarin.calcNewDose1: inrRage must be a number';
     }
     
     dosingChange = Warfarin.dosingChange1[inrRange];
@@ -190,7 +203,7 @@ Warfarin.calcNewDose1 = function(inrRange, dose) {
           newDose = a;
       }
     } else if (dosingChange.change == 'no') {
-      newDose.dose = dose;
+      newDose = dose;
     } else if (dosingChange.change = 'special') {
       newDose = null;    
     }
@@ -211,12 +224,13 @@ Warfarin.UI.id = {
     inrTime: 'N_AFControl_8_Time_dateInput',
     doseAdjustment: 'N_AFControl_9',
     newWeeklyDose5mg: 'new-weekly-dose',
-    newWeeklyDoseText: 'new-weekly-dose-text',
+    newWeeklyDoseSchedule: 'new-weekly-dose-schedule',
+    newWeeklyDosePercent: 'new-weekly-dose-percent',
     newWeeklyDoseComment: 'new-weekly-dose-comment',
     nextINRDate: 'next-inr-date',
     nextINRTime: 'N_AFControl_12_Time_dateInput',
     nextINRComment: 'next-inr-date-comment',
-    calcScore: 'calc',
+    calc: 'calc',
     ref: 'ref',
     today: 'today',
     inrMsg: 'inrMsg'
@@ -260,7 +274,7 @@ Warfarin.UI.getCurrentWeeklyDose5mg = function() {
     var dose = $('#'+Warfarin.UI.id.currentWeeklyDose5mg+' option:selected').text();
     
     if (dose == '-select-') {
-        return;
+        return 0;
     } else {
         return dose.split(' ')[0];
     }
@@ -301,9 +315,7 @@ Warfarin.UI.onCurrentWeeklyDose5mgChange = function() {
    
     dose = Warfarin.UI.getCurrentWeeklyDose5mg();
     console.log(dose);
-    if (dose) {
-        Warfarin.UI.setCurrentWeeklyDose(Warfarin.getDoseString(dose));
-    }    
+    Warfarin.UI.setCurrentWeeklyDose(Warfarin.getDoseString(dose));
 };
 
 /*
@@ -313,7 +325,7 @@ Warfarin.UI.getNewWeeklyDose5mg = function() {
     var dose = $('#'+Warfarin.UI.id.newWeeklyDose5mg+' option:selected').text();
     
     if (dose == '-select-') {
-        return;
+        return 0;
     } else {
         return dose.split(' ')[0];
     }
@@ -343,19 +355,36 @@ Warfarin.UI.initNewWeeklyDose5mg = function() {
 };
 
 Warfarin.UI.onNewWeeklyDose5mgChange = function () {
-    if (!Warfarin.UI.isDosing5mg()) {
-        return;
+  var currentDose, newDose, delta, str;
+  
+  if (!Warfarin.UI.isDosing5mg()) {
+      return;
+  }
+ 
+  newDose = Warfarin.UI.getNewWeeklyDose5mg();
+  Warfarin.UI.setNewWeeklyDoseSchedule(Warfarin.getDoseString(newDose));
+  
+  currentDose = Warfarin.UI.getCurrentWeeklyDose5mg();
+  
+  if (currentDose && newDose) {
+    delta = newDose - currentDose;
+    if (delta >= 0) {
+      str = newDose + ' mg = ';
+      str += ((delta/currentDose)*100).toFixed(1);
+      str += '% increase';
+    } else {
+      str = newDose + ' mg = ';
+      str += (-(delta/currentDose)*100).toFixed(1);
+      str += '% decrease';
     }
-   
-    dose = Warfarin.UI.getNewWeeklyDose5mg();
-    console.log(dose);
-    if (dose) {
-        Warfarin.UI.setNewWeeklyDose(Warfarin.getDoseString(dose));
-    }    
+    Warfarin.UI.setNewWeeklyDosePercent(str);
+  } else {
+    Warfarin.UI.setNewWeeklyDosePercent('');
+  }
 };
 
-Warfarin.UI.setNewWeeklyDose = function(dose) {
-    $('#'+Warfarin.UI.id.newWeeklyDoseText).html(dose);
+Warfarin.UI.setNewWeeklyDoseSchedule = function(dose) {
+    $('#'+Warfarin.UI.id.newWeeklyDoseSchedule).html(dose);
 };
 
 Warfarin.UI.getINRResult = function() {
@@ -368,6 +397,19 @@ Warfarin.UI.setINRResult = function(index) {
     $('#'+Warfarin.UI.id.inrResult).val(tmp);
     
     $('#'+Warfarin.UI.id.inrResult).selectmenu('refresh', true);
+};
+
+Warfarin.UI.onINRResultChange = function() {
+  var inrRange;
+  
+  inrRange = Warfarin.UI.getINRResult();
+  
+  if (inrRange == '-1') {
+    Warfarin.UI.setNextINRDateComment('');
+  } else {
+    Warfarin.UI.setNextINRDateComment(Warfarin.getNextDateString1(inrRange));
+    Warfarin.UI.setNewWeeklyDoseComment(Warfarin.getDoseChangeString1(inrRange));
+  }
 };
 
 Warfarin.UI.getINRDate = function() {
@@ -402,6 +444,23 @@ Warfarin.UI.setDoseAdjustment = function(status) {
      $('#'+Warfarin.UI.id.doseAdjustment).val(status ? yes : no);
 };
 
+Warfarin.UI.getNewWeeklyDosePercent = function() {
+  return $('#'+Warfarin.UI.id.newWeeklyDosePercent).html();
+};
+
+Warfarin.UI.setNewWeeklyDosePercent = function(text) {
+  $('#'+Warfarin.UI.id.newWeeklyDosePercent).html(text);
+};
+
+
+Warfarin.UI.getNewWeeklyDoseComment = function() {
+  return $('#'+Warfarin.UI.id.newWeeklyDoseComment).html();
+};
+
+Warfarin.UI.setNewWeeklyDoseComment = function(text) {
+  $('#'+Warfarin.UI.id.newWeeklyDoseComment).html(text);
+};
+
 Warfarin.UI.getNextINRDate = function() {
     var dateTxt, date;
     
@@ -419,11 +478,11 @@ Warfarin.UI.setNextINRDate = function(date) {
 };
 
 Warfarin.UI.getNextINRDateComment = function() {
-    return  $('#'+Warfarin.UI.id.nextINRComment).val();
+    return  $('#'+Warfarin.UI.id.nextINRComment).html();
 };
 
 Warfarin.UI.setNextINRDateComment = function(text) {
-    $('#'+Warfarin.UI.id.nextINRComment).val(text);
+    $('#'+Warfarin.UI.id.nextINRComment).html(text);
 };
 
 Warfarin.UI.clearNewWekklyDose = function() {
@@ -436,12 +495,12 @@ Warfarin.UI.clearNewWekklyDose = function() {
 };
 
 Warfarin.UI.addINRButton1 = function() {
-    $('#'+Warfarin.UI.id.newWeeklyDose5mg).after('<input id="'+Warfarin.UI.id.calcScore+'" type="button" value="Calculate Score">');
-    $('#'+Warfarin.UI.id.calcScore).bind('click', Warfarin.UI.calcINR1);    
+    $('#'+Warfarin.UI.id.newWeeklyDose5mg).after('<input id="'+Warfarin.UI.id.calc+'" type="button" value="Calculate Score">');
+    $('#'+Warfarin.UI.id.calc).bind('click', Warfarin.UI.calcINR1);    
 };
 
 Warfarin.UI.addRefButton = function() {
-    $('#'+Warfarin.UI.id.calcScore).after('<input id="'+Warfarin.UI.id.ref+'" type="button" value="Reference">');
+    $('#'+Warfarin.UI.id.calc).after('<input id="'+Warfarin.UI.id.ref+'" type="button" value="Reference">');
     $('#'+Warfarin.UI.id.ref).bind('click', Warfarin.UI.onRef);
 };
 
@@ -452,7 +511,7 @@ Warfarin.UI.addTodayButton = function() {
 };
 
 Warfarin.UI.calcINR1 = function() {
-    var dose, doseText, inrRange, newDose, inrDate;
+    var dose, inrRange, newDose, newDoseComment, nextDateComment, inrDate;
     
     if (!Warfarin.UI.isDosing5mg()) {
         Warfarin.UI.msgInr('To use dosing calculator you must use 5 mg dosing schedule.');
@@ -472,33 +531,35 @@ Warfarin.UI.calcINR1 = function() {
     }
 
     newDose = Warfarin.calcNewDose1(inrRange, dose);
-    if (newDose.dose) {
-        Warfarin.UI.setNewWeeklyDose5mg(newDose.dose);
-        if (newDose.instructions) {
-            doseText = newDose.instructions+' then\n';
-            doseText += Warfarin.getDoseString(newDose.dose);
-        } else {
-            doseText = Warfarin.getDoseString(newDose.dose);
-        }
-        if (newDose.dose-dose > 0) {
-            doseText += '\nIncrease: ';
-            doseText += ((newDose.dose-dose)/dose*100).toFixed(1)+'%';
-        } else if(newDose.dose-dose < 0)  {
-            doseText += '\nDecrease: ';
-            doseText += ((dose-newDose.dose)/dose*100).toFixed(1)+'%';
-        }
-        Warfarin.UI.setNewWeeklyDose(doseText);
-        
-        Warfarin.UI.setDoseAdjustment(dose != newDose.dose);
-        if (newDose.nextInr) {
-            Warfarin.UI.setNextINRDateComment('Check INR in '+newDose.nextInr+' days');
-            inrDate = Warfarin.UI.getINRDate();
-            if (inrDate.valueOf() !== NaN) {
-                inrDate.setDate(inrDate.getDate()+newDose.nextInr);
-                Warfarin.UI.setNextINRDate(inrDate);
-            }
-            
-        }
+    if (newDose) {
+        Warfarin.UI.setNewWeeklyDose5mg(newDose);
+        Warfarin.UI.onNewWeeklyDose5mgChange();
+        // Warfarin.UI.setNextINRDateComment(nextDateComment);
+        // if (newDose.instructions) {
+            // doseText = newDose.instructions+' then\n';
+            // doseText += Warfarin.getDoseString(newDose.dose);
+        // } else {
+            // doseText = Warfarin.getDoseString(newDose.dose);
+        // }
+        // if (newDose.dose-dose > 0) {
+            // doseText += '\nIncrease: ';
+            // doseText += ((newDose.dose-dose)/dose*100).toFixed(1)+'%';
+        // } else if(newDose.dose-dose < 0)  {
+            // doseText += '\nDecrease: ';
+            // doseText += ((dose-newDose.dose)/dose*100).toFixed(1)+'%';
+        // }
+        // Warfarin.UI.setNewWeeklyDose(doseText);
+//         
+        // Warfarin.UI.setDoseAdjustment(dose != newDose.dose);
+        // if (newDose.nextInr) {
+            // Warfarin.UI.setNextINRDateComment('Check INR in '+newDose.nextInr+' days');
+            // inrDate = Warfarin.UI.getINRDate();
+            // if (inrDate.valueOf() !== NaN) {
+                // inrDate.setDate(inrDate.getDate()+newDose.nextInr);
+                // Warfarin.UI.setNextINRDate(inrDate);
+            // }
+//             
+        // }
     } else {
         Warfarin.UI.clearNewWekklyDose();
         Warfarin.UI.msgInr(newDose.instructions);
@@ -524,21 +585,26 @@ Warfarin.UI.msgInr = function(txt) {
 };
 
 Warfarin.UI.initINRCalc1 = function() {
-    Warfarin.UI.addINRButton1();
-    Warfarin.UI.addRefButton();
-    Warfarin.UI.addTodayButton();
+    // Warfarin.UI.addINRButton1();
+    // Warfarin.UI.addRefButton();
+    // Warfarin.UI.addTodayButton();
     
-    $('#'+Warfarin.UI.id.currentWeeklyDose5mg).bind('change', Warfarin.UI.onCurrentWeeklyDose5mgChange);
-    $('#'+Warfarin.UI.id.newWeeklyDose5mg).bind('change', Warfarin.UI.onNewWeeklyDose5mgChange);
+    Warfarin.UI.initCurrentWeeklyDose5mg();
+    Warfarin.UI.initNewWeeklyDose5mg();
+    
+    $('#'+Warfarin.UI.id.currentWeeklyDose5mg).change(Warfarin.UI.onCurrentWeeklyDose5mgChange);
+    $('#'+Warfarin.UI.id.newWeeklyDose5mg).change(Warfarin.UI.onNewWeeklyDose5mgChange);
+    $('#'+Warfarin.UI.id.inrResult).change(Warfarin.UI.onINRResultChange);
+    $('#'+Warfarin.UI.id.calc).click(Warfarin.UI.calcINR1);
        
-    $('<div id="inrMsg"></div>').appendTo('body').dialog({autoOpen: false});
+    // $('<div id="inrMsg"></div>').appendTo('body').dialog({autoOpen: false});
     
     /*
      * Testing initalization
      */
-    Warfarin.UI.setDosing5mg(true);
-    Warfarin.UI.setCurrentWeeklyDose5mg(30);
-    Warfarin.UI.setCurrentWeeklyDose(Warfarin.getDoseString(30));
-    Warfarin.UI.setINRResult(3);
-    Warfarin.UI.setINRDate(new Date());
+    // Warfarin.UI.setDosing5mg(true);
+    // Warfarin.UI.setCurrentWeeklyDose5mg(30);
+    // Warfarin.UI.setCurrentWeeklyDose(Warfarin.getDoseString(30));
+    // Warfarin.UI.setINRResult(3);
+    // Warfarin.UI.setINRDate(new Date());
 };
