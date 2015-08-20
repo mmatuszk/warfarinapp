@@ -11,6 +11,11 @@
   </head>
 <body>
   <div data-role="page">
+    <div data-role="header">
+       <a href="#" class="ui-alt-icon ui-nodisc-icon ui-btn ui-icon-bars ui-btn-icon-notext">Menu</a>
+      <h1>WarfarinApp</h1>
+      <a href="#" class="ui-btn" id="reset">Reset</a>
+    </div>
     <div role="main" class="ui-content">
       <h2>INR Goal 2.0 - 3.0</h2>
       <label for="dosing-5mg">5mg Dosing</label>
@@ -24,7 +29,7 @@
       </select>
       <div data-role="collapsible">
         <h1>Schedule</h1>
-        <div id="weekly-dose-text">Select weekly dose</div>
+        <div id="weekly-dose-schedule">Select a weekly dose</div>
       </div>
       <label for="inr-result-range">INR Result Range</label>
       <select id="inr-result-range">
@@ -41,7 +46,7 @@
       <button class="ui-button" id="calc">Calculate</button>
       <label for="new-weekly-dose">New Weekly Dose</label>
       <select id="new-weekly-dose">
-        <option value+"0">-select-</option>
+        <option value="0">-select-</option>
       </select>
       <div id="new-weekly-dose-percent"></div>
       <div id="new-weekly-dose-comment"></div>
@@ -50,7 +55,7 @@
       <input type="date" id="next-inr-date" />
       <div data-role="collapsible">
         <h1>Schedule</h1>
-        <div id="new-weekly-dose-schedule">Select new weekly dose</div>
+        <div id="new-weekly-dose-schedule">Select a weekly dose</div>
       </div>
     </div>    
   </div>
