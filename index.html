@@ -7,63 +7,120 @@
   <link rel="stylesheet" href="jquery.mobile-1.4.5.css" />
   <script src="jquery-1.11.1.js"></script>
   <script src="jquery.mobile-1.4.5.js"></script>
+  <script>
+    $( document ).on( "pagecreate", function() {
+      $( "body > [data-role='panel']" ).panel();
+      $( "body > [data-role='panel'] [data-role='listview']" ).listview();
+    });
+    // $( document ).one( "pageshow", function() {
+      // $( "body > [data-role='header']" ).toolbar();
+      // $( "body > [data-role='header'] [data-role='navbar']" ).navbar();
+    // });
+  </script>
   <!-- <script src="http://code.jquery.com/jquery-1.11.1.js"></script> -->
   </head>
 <body>
-  <div data-role="page">
-    <div data-role="header">
-       <a href="#" class="ui-alt-icon ui-nodisc-icon ui-btn ui-icon-bars ui-btn-icon-notext">Menu</a>
+  <div data-role="page" id="calc-page">
+    <div data-role="header" data-position="fixed" data-theme="a">
+       <a href="#panel" class="ui-alt-icon ui-nodisc-icon ui-btn ui-icon-bars ui-btn-icon-notext">Menu</a>
       <h1>WarfarinApp</h1>
       <a href="#" class="ui-btn" id="reset">Reset</a>
     </div>
     <div role="main" class="ui-content">
-      <h2>INR Goal 2.0 - 3.0</h2>
-      <label for="dosing-5mg">5mg Dosing</label>
-      <select id="dosing-5mg" name="dosing-5mg" data-role="flipswitch">
-        <option>No</option>
-        <option selected="">Yes</option>
-      </select>
-      <label for="weekly-dose">Current Weekly Dose</label>
-      <select id="weekly-dose">
-        <option value="0">-select-</option>
-      </select>
-      <div data-role="collapsible">
-        <h1>Schedule</h1>
-        <div id="weekly-dose-schedule">Select a weekly dose</div>
+      <!-- <h2>INR Goal 2.0 - 3.0</h2> -->
+      <!-- <label for="inr-goal" class="select">INR Goal</label> -->
+      <div>
+        INR Goal
+        <select id="inr-goal" data-mini="true" data-inline="true">
+          <option value="0">2.0 - 3.0</option>
+          <option value="1">2.5 - 3.5</option>
+        </select>
       </div>
-      <label for="inr-result-range">INR Result Range</label>
-      <select id="inr-result-range">
-        <option value="-1">-select-</option>
-        <option value="0">&lt; 1.5</option>
-        <option value="1">1.5 - 1.9</option>
-        <option value="2">2.0 - 3.0</option>
-        <option value="3">3.1 - 3.9</option>
-        <option value="4">4.0 - 4.9</option>
-        <option value="5">&ge; 5.0</optgroup>
-      </select>
-      <label for="inr-date">INR Date</label>
-      <input type="date" id="inr-date">
-      <button class="ui-button" id="calc">Calculate</button>
-      <label for="new-weekly-dose">New Weekly Dose</label>
-      <select id="new-weekly-dose">
-        <option value="0">-select-</option>
-      </select>
-      <div id="new-weekly-dose-percent"></div>
-      <div id="new-weekly-dose-comment"></div>
-      <div id="next-inr-date-comment"></div>
-      <label for="next-inr-date">Next INR Date</label>
-      <input type="date" id="next-inr-date" />
-      <div data-role="collapsible">
-        <h1>Schedule</h1>
-        <div id="new-weekly-dose-schedule">Select a weekly dose</div>
+      <!-- <label for="dosing-5mg">5mg Dosing</label> -->
+      <div>
+        5mg Dosing
+        <select id="dosing-5mg" name="dosing-5mg" data-role="flipswitch">
+          <option>No</option>
+          <option selected="">Yes</option>
+        </select>
       </div>
-    </div>    
+      <div id='wrapper-dosing-ui'>
+        <label for="weekly-dose">Current Weekly Dose</label>
+        <div id="wrapper-weekly-dose">
+          <select id="weekly-dose">
+            <option value="0">-select-</option>
+          </select>
+          <div data-role="collapsible">
+            <h1>Schedule</h1>
+            <div id="weekly-dose-schedule">Select a weekly dose</div>
+          </div>      
+        </div>
+        <div id="wrapper-weekly-dose-txt">
+          <input type="text" id="weekly-dose-txt" placeholder="Weekly dose" value="">        
+        </div>
+        <label for="inr-result-range">INR Result Range</label>
+        <select id="inr-result-range">
+        </select>
+        <label for="inr-date">INR Date</label>
+        <input type="date" id="inr-date">
+        <button class="ui-button" id="calc">Calculate</button>
+        <div id="new-weekly-dose-panel">
+          <label for="new-weekly-dose">New Weekly Dose</label>
+          <div id="wrapper-new-weekly-dose">
+            <select id="new-weekly-dose">
+              <option value="0">-select-</option>
+            </select>
+            <div data-role="collapsible">
+              <h1>Schedule</h1>
+              <div id="new-weekly-dose-schedule">Select a weekly dose</div>
+            </div>
+          </div>
+          <div id="wrapper-new-weekly-dose-txt">
+            <input type="text" id="new-weekly-dose-txt" placeholder="Weekly dose" value="">        
+          </div>        
+          <div id="new-weekly-dose-percent"></div>
+          <div id="new-weekly-dose-comment"></div>
+          <div id="next-inr-date-comment"></div>
+          <label for="next-inr-date">Next INR Date</label>
+          <input type="date" id="next-inr-date" />
+        </div>
+        <div id="new-weekly-dose-message"></div>
+      </div>
+    <div id='wrapper-msg'>
+      <div id='msg'>      
+      </div>
+    </div>
+    </div>
+  </div>
+  <div data-role="page" id="about-page">
+    <div data-role="header" data-position="fixed" data-theme="a">
+       <a href="#panel" class="ui-alt-icon ui-nodisc-icon ui-btn ui-icon-bars ui-btn-icon-notext">Menu</a>
+      <h1>WarfarinApp</h1>
+    </div>
+    
+    <div role="main" class="ui-content">
+      <h3>WarfarinApp</h3>
+      Version: 0.1 - alpha<br>
+      Reference: <a href="http://www.aafp.org/fpm/2005/0500/p77.html">AAFP: A Systematic Approach to Managing Warfarin Doses</a><br>
+      Author: <a href="mailto:marcin@jewelmirror.com">Marcin Matuszkiewicz, MD</a>
+      <br>
+    </div>
+  </div>  
+
+  <div data-role="panel" data-theme="b" data-display="push" id="panel">
+    <ul data-role="listview">
+      <li data-icon="back"><a href="#" data-rel="close">Close</a></li>
+      <li><a href="#calc-page" data-rel="close">Warfarin Dosing Calculator</a></li>
+      <li><a href="#about-page" data-rel="close">About</a></li>
+    </ul>
   </div>
   
-  <script src="warfarin.js"></script>
+  
+  <!-- <script src="warfarin.js"></script> -->
+  <script src="warfarin.js"></script>  
   <script>
     $(document).ready(function() {
-      Warfarin.UI.initINRCalc1();
+      warfarin.ui.initINRCalc();
       // Warfarin.UI.initCurrentWeeklyDose5mg();
       // Warfarin.UI.setCurrentWeeklyDose5mg(35);
       // Warfarin.UI.initNewWeeklyDose5mg();
