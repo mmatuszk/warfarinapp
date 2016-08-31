@@ -135,6 +135,12 @@ warfarin.calc = (function() {
     }
   };
   
+  pub.getBleedingString = function() {
+    var str = 'Serious bleeding, any INR: Hold warfarin; give vitamin K1 10 mg slow intravenous (IV) plus fresh plasma or prothrombin complex concentrate, depending on urgency; repeat vitamin K1 every 12 hours as needed.<p>Life-threatening bleeding, any INR: Hold warfarin; give prothrombin complex concentrate (or recombinant factor VIIa as an alternate) supplemented with vitamin K1 (10 mg slow IV); repeat as needed.';
+    
+    return str;
+  };
+  
   pub.setINRGoalIndex = function(index) {
     INRGoalIndex = index;
   };
@@ -330,6 +336,9 @@ warfarin.calc = (function() {
  *****************************************************************************/
 warfarin.ui = (function() {
   var id = {
+    bleeding: 'bleeding',
+    wrapperCalc: 'wrapper-calc',
+    wrapperDosing5mg: 'wrapper-dosing-5mg',
     dosing5mg: 'dosing-5mg',
     inrGoal: 'inr-goal',
     wrapperDosingUI: 'wrapper-dosing-ui',
@@ -360,6 +369,58 @@ warfarin.ui = (function() {
     today: 'today',
     inrMsg: 'inrMsg'
   };
+
+  function isBleeding() {
+    if ($('#'+id.bleeding+' option:selected').text() == 'Yes') {
+        return true;
+    }
+    
+    return false;    
+  }
+   /*
+   * status - true or false
+   */
+  function setBleeding(status) {
+    var yes = $('#'+id.bleeding+' option:eq(1)').val();
+    var no = $('#'+id.bleeding+' option:eq(0)').val();
+    
+    if (status) {
+        $('#'+id.bleeding).val(yes);
+    } else {
+        $('#'+id.bleeding).val(no);
+    }
+    
+    $('#'+id.bleeding).flipswitch('refresh');
+  }
+  
+  function onBleedingChange() {
+    if (isBleeding()) {
+      calcHide();
+      setMsg(warfarin.calc.getBleedingString());
+      msgShow();
+    } else {
+      setMsg('');
+      msgHide();
+      calcShow();
+    }
+  }
+  
+  function calcHide() {
+    $('#'+id.wrapperCalc).hide();
+  }
+  
+  function calcShow() {
+    $('#'+id.wrapperCalc).show();
+  }
+  
+  function dosing5mgHide() {
+    console.log('hidding 5m');
+    $('#'+id.wrapperDosing5mg).hide();
+  }
+  
+  function dosing5mgShow() {
+    $('#'+id.wrapperDosing5mg).show();
+  }
   
   function isDosing5mg() {
     if ($('#'+id.dosing5mg+' option:selected').text() == 'Yes') {
@@ -837,6 +898,8 @@ warfarin.ui = (function() {
   }
   
   function reset() {
+    // set bleeding to no
+    setBleeding(false);
     // defualt goal is 2-3
     setINRGoal(0);
     // default dosing is 5 mg
@@ -867,9 +930,12 @@ warfarin.ui = (function() {
     initNewWeeklyDose5mg();
     // default mode is 5mg dosing
     setUIDosingMode5mg();
+    // Hide the interface to change the dosig mode
+    dosing5mgHide();
     // Default INR target is 0
     initINRResultRange(0);
     
+    $('#'+id.bleeding).change(onBleedingChange);
     $('#'+id.dosing5mg).change(onDosing5mgChange);
     $('#'+id.inrGoal).change(onINRGoalChange);
     
@@ -877,13 +943,15 @@ warfarin.ui = (function() {
     $('#'+id.newWeeklyDose5mg).change(onNewWeeklyDose5mgChange);
     $('#'+id.inrResult).change(onINRResultChange);
     $('#'+id.inrDate).change(onINRDateChange);
+    // Hide the calculate button.  Not currently used
     $('#'+id.calc).click(calcINR).hide();
+    // Bind 
     $('#'+id.reset).click(reset);
 
   };
   
-  pub.t1 = setINRGoal;
-  pub.t2 = reset;
+  pub.t1 = onBleedingChange;
+  pub.t2 = calcShow;
   pub.t3 = initINRResultRange;
 
   

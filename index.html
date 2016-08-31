@@ -27,69 +27,76 @@
       <a href="#" class="ui-btn" id="reset">Reset</a>
     </div>
     <div role="main" class="ui-content">
-      <!-- <h2>INR Goal 2.0 - 3.0</h2> -->
-      <!-- <label for="inr-goal" class="select">INR Goal</label> -->
       <div>
-        INR Goal
-        <select id="inr-goal" data-mini="true" data-inline="true">
-          <option value="0">2.0 - 3.0</option>
-          <option value="1">2.5 - 3.5</option>
+        Bleeding
+        <select id="bleeding" name="bleeding" data-role="flipswitch">
+          <option selected="">No</option>
+          <option>Yes</option>
         </select>
       </div>
-      <!-- <label for="dosing-5mg">5mg Dosing</label> -->
-      <div>
-        5mg Dosing
-        <select id="dosing-5mg" name="dosing-5mg" data-role="flipswitch">
-          <option>No</option>
-          <option selected="">Yes</option>
-        </select>
-      </div>
-      <div id='wrapper-dosing-ui'>
-        <label for="weekly-dose">Current Weekly Dose</label>
-        <div id="wrapper-weekly-dose">
-          <select id="weekly-dose">
-            <option value="0">-select-</option>
+      <div id='wrapper-calc'>
+        <div>
+          INR Goal
+          <select id="inr-goal" data-mini="true" data-inline="true">
+            <option value="0">2.0 - 3.0</option>
+            <option value="1">2.5 - 3.5</option>
           </select>
-          <div data-role="collapsible">
-            <h1>Schedule</h1>
-            <div id="weekly-dose-schedule">Select a weekly dose</div>
-          </div>      
         </div>
-        <div id="wrapper-weekly-dose-txt">
-          <input type="text" id="weekly-dose-txt" placeholder="Weekly dose" value="">        
+        <!-- <label for="dosing-5mg">5mg Dosing</label> -->
+        <div id="wrapper-dosing-5mg">
+          5mg Dosing
+          <select id="dosing-5mg" name="dosing-5mg" data-role="flipswitch">
+            <option>No</option>
+            <option selected="">Yes</option>
+          </select>
         </div>
-        <label for="inr-result-range">INR Result Range</label>
-        <select id="inr-result-range">
-        </select>
-        <label for="inr-date">INR Date</label>
-        <input type="date" id="inr-date">
-        <button class="ui-button" id="calc">Calculate</button>
-        <div id="new-weekly-dose-panel">
-          <label for="new-weekly-dose">New Weekly Dose</label>
-          <div id="wrapper-new-weekly-dose">
-            <select id="new-weekly-dose">
+        <div id='wrapper-dosing-ui'>
+          <label for="weekly-dose">Current Weekly Dose</label>
+          <div id="wrapper-weekly-dose">
+            <select id="weekly-dose">
               <option value="0">-select-</option>
             </select>
             <div data-role="collapsible">
               <h1>Schedule</h1>
-              <div id="new-weekly-dose-schedule">Select a weekly dose</div>
-            </div>
+              <div id="weekly-dose-schedule">Select a weekly dose</div>
+            </div>      
           </div>
-          <div id="wrapper-new-weekly-dose-txt">
-            <input type="text" id="new-weekly-dose-txt" placeholder="Weekly dose" value="">        
-          </div>        
-          <div id="new-weekly-dose-percent"></div>
-          <div id="new-weekly-dose-comment"></div>
-          <div id="next-inr-date-comment"></div>
-          <label for="next-inr-date">Next INR Date</label>
-          <input type="date" id="next-inr-date" />
+          <div id="wrapper-weekly-dose-txt">
+            <input type="text" id="weekly-dose-txt" placeholder="Weekly dose" value="">        
+          </div>
+          <label for="inr-result-range">INR Result Range</label>
+          <select id="inr-result-range">
+          </select>
+          <label for="inr-date">INR Date</label>
+          <input type="date" id="inr-date">
+          <button class="ui-button" id="calc">Calculate</button>
+          <div id="new-weekly-dose-panel">
+            <label for="new-weekly-dose">New Weekly Dose</label>
+            <div id="wrapper-new-weekly-dose">
+              <select id="new-weekly-dose">
+                <option value="0">-select-</option>
+              </select>
+              <div data-role="collapsible">
+                <h1>Schedule</h1>
+                <div id="new-weekly-dose-schedule">Select a weekly dose</div>
+              </div>
+            </div>
+            <div id="wrapper-new-weekly-dose-txt">
+              <input type="text" id="new-weekly-dose-txt" placeholder="Weekly dose" value="">        
+            </div>        
+            <div id="new-weekly-dose-percent"></div>
+            <div id="new-weekly-dose-comment"></div>
+            <div id="next-inr-date-comment"></div>
+            <label for="next-inr-date">Next INR Date</label>
+            <input type="date" id="next-inr-date" />
+          </div>
+          <div id="new-weekly-dose-message"></div>
         </div>
-        <div id="new-weekly-dose-message"></div>
       </div>
-    <div id='wrapper-msg'>
-      <div id='msg'>      
+      <div id='wrapper-msg'>
+        <div id='msg'>      
+        </div>
       </div>
-    </div>
     </div>
   </div>
   <div data-role="page" id="about-page">
@@ -100,7 +107,7 @@
     
     <div role="main" class="ui-content">
       <h3>WarfarinApp</h3>
-      Version: 0.0.2<br>
+      Version: 0.1.0<br>
       Reference: <a href="http://www.aafp.org/fpm/2005/0500/p77.html">AAFP: A Systematic Approach to Managing Warfarin Doses</a><br>
       Author: <a href="mailto:marcin@jewelmirror.com">Marcin Matuszkiewicz, MD</a>
       <br>
@@ -137,13 +144,6 @@
   <script>
     $(document).ready(function() {
       warfarin.ui.initINRCalc();
-      // Warfarin.UI.initCurrentWeeklyDose5mg();
-      // Warfarin.UI.setCurrentWeeklyDose5mg(35);
-      // Warfarin.UI.initNewWeeklyDose5mg();
-      // Warfarin.UI.setNewWeeklyDose5mg(30);
-      // $('#weekly-dose').change(Warfarin.UI.onCurrentWeeklyDose5mgChange);
-      // $('#new-weekly-dose').change(Warfarin.UI.onNewWeeklyDose5mgChange);
-      // $('#calc').click(Warfarin.UI.calcINR1);
     });
   </script>
 </body>
