@@ -30,14 +30,16 @@ warfarin.calc = (function() {
        2: '2.0 - 3.0',
        3: '3.1 - 3.9',
        4: '4.0 - 4.9',
-       5: '&ge; 5.0'},
+       5: '5.0 - 8.9',
+       6: '&ge; 9.0'},
      1:
       {0: '&lt 1.5',
        1: '1.5 - 2.4',
        2: '2.5 - 3.5',
        3: '3.6 - 4.5',
        4: '4.5 - 6.0',
-       5: '&gt; 6.0'}  
+       5: '6.1 - 8.9',
+       6: '&ge; 9.0'}  
     };
   
   var dosingSchedule = {
@@ -100,8 +102,10 @@ warfarin.calc = (function() {
       3: {change: "decrease", min: 0.05, max: 0.1, nextDate: 14, nextDateMin: 7, nextDateMax: 14},
       // 4.0 - 4.9
       4: {change: "decrease", min: 0.1, max: 0.1, nextDate: 7, nextDateMin: 4, nextDateMax: 8, holdMin: 0, holdMax: 1},
-      // greater or equal 5.0
-      5: {change: "special", special: "Manage per per your institutions protocol"}
+      // 5.0 - 8.9
+      5: {change: "decrease", min: 0.1, max: 0.2, nextDateComment: 'Monitor frequently.  Alternatively consider vitamin K1 1 to 2.5 mg orally'},
+      //  greater than 8.9
+      6: {change: "special", special: "Hold warfarin therapy, give vitamin K1 5 to 10 mg orally, monitor frequently.  Resume at lower dose when INR is therapeutic"}
     }, 1:
     {
       // less than 1.5
@@ -114,8 +118,10 @@ warfarin.calc = (function() {
       3: {change: "decrease", min: 0.05, max: 0.1, nextDate: 14, nextDateMin: 7, nextDateMax: 14},
       // 4.5 - 6.0
       4: {change: "decrease", min: 0.05, max: 0.15, nextDate: 5, nextDateMin: 2, nextDateMax: 8, holdMin: 0, holdMax: 1},
-      // greater 6.0
-      5: {change: "special", special: "Manage per per your institutions protocol"}      
+      // 6.1 - 8.9
+      5: {change: "decrease", min: 0.1, max: 0.2, nextDateComment: 'Monitor frequently.  Alternatively consider vitamin K1 1 to 2.5 mg orally'},
+      //  greater than 8.9
+      6: {change: "special", special: "Hold warfarin therapy, give vitamin K1 5 to 10 mg orally, monitor frequently.  Resume at lower dose when INR is therapeutic"}
     }
   };
   
@@ -209,8 +215,10 @@ warfarin.calc = (function() {
     var dc = dosingChange[INRGoalIndex][index];
   
     var str = '';
-   if (dc.change == 'special') {
+    if (dc.change == 'special') {
       str = dc.special;
+    } else if (dc.nextDateComment) {
+      str = dc.nextDateComment;
     } else {
       str += 'Next INR in ';
       if (dc.nextDateMin == dc.nextDateMax) {
@@ -697,6 +705,9 @@ warfarin.ui = (function() {
     if (inrRange == '-1') {
       setNextINRDateComment('');
       setNextINRDate();
+      clearNewWeeklyDose();
+      newWeeklyDosePanelShow();
+      setNewWeeklyDoseMessage('');
     } else {
       if (dose > 0) {
         calcINR();      
@@ -855,46 +866,46 @@ warfarin.ui = (function() {
   }
   
   function calcINR() {
-      var dose, inrRange, newDose, newDoseComment, nextDateComment, inrDate;
-      
-      if (!isDosing5mg()) {
-          msgInr('To use dosing calculator you must use 5 mg dosing schedule.');
-          return;
-      }
-      
-      dose = getCurrentWeeklyDose5mg();
-      if (dose == '-select-') {
-          msgInr('You must select current dose.');
-          return;        
-      }
-      
-      inrRange = getINRResult();
-      if (inrRange == '-select-') {
-          msgInr('You must select INR result.');
-          return;        
-      }
-  
-      newDose = warfarin.calc.calcNewDose(inrRange, dose);
-      if (newDose) {
-          newWeeklyDosePanelShow();
-          setNewWeeklyDoseMessage('');
-          setNewWeeklyDose5mg(newDose);
-          onNewWeeklyDose5mgChange();
-          var nextINR = warfarin.calc.getNextDateDefault(inrRange);
-          if (typeof nextINR !== 'undefined') {
-            var inrDate = getINRDate();
-            if (inrDate.valueOf() !== NaN) {
-                inrDate.setDate(inrDate.getDate()+nextINR);
-                setNextINRDate(inrDate);
-            }
-          }       
+    var dose, inrRange, newDose, newDoseComment, nextDateComment, inrDate;
+    
+    if (!isDosing5mg()) {
+      msgInr('To use dosing calculator you must use 5 mg dosing schedule.');
+      return;
+    }
+    
+    dose = getCurrentWeeklyDose5mg();
+    if (dose == '-select-') {
+      msgInr('You must select current dose.');
+      return;        
+    }
+    
+    inrRange = getINRResult();
+    if (inrRange == '-select-') {
+      msgInr('You must select INR result.');
+      return;        
+    }
+
+    newDose = warfarin.calc.calcNewDose(inrRange, dose);
+    if (newDose) {
+      newWeeklyDosePanelShow();
+      setNewWeeklyDoseMessage('');
+      setNewWeeklyDose5mg(newDose);
+      onNewWeeklyDose5mgChange();
+      var nextINR = warfarin.calc.getNextDateDefault(inrRange);
+      if (typeof nextINR !== 'undefined') {
+        var inrDate = getINRDate();
+        if (inrDate.valueOf() !== NaN) {
+          inrDate.setDate(inrDate.getDate()+nextINR);
+          setNextINRDate(inrDate);
+        }
       } else {
-        newWeeklyDosePanelHide();
-        setNewWeeklyDoseMessage('Assess for bleeding.  Follow your institutional protocol');
-          // clearNewWekklyDose();
-          // msgInr(newDose.instructions);
-          // return;
-      }
+        // Reset INR date
+        setNextINRDate();        
+      }       
+    } else {
+      newWeeklyDosePanelHide();
+      setNewWeeklyDoseMessage("Hold warfarin therapy, give vitamin K1 5 to 10 mg orally, monitor frequently.  Resume at lower dose when INR is therapeutic");
+    }
   }
   
   function reset() {
@@ -911,7 +922,10 @@ warfarin.ui = (function() {
     setINRResult();
     setINRDate();
     
+    
+    newWeeklyDosePanelShow();
     clearNewWeeklyDose();
+    setNewWeeklyDoseMessage('');
   }
   
   // function msgInr(txt) {
